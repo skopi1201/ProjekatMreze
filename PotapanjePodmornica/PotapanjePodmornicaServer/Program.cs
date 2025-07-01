@@ -9,23 +9,20 @@ namespace PotapanjePodmornicaServer
     {
         static void Main(string[] args)
         {
-            int udpPort = 9000;
+            int ServerUdpPort = 9000;
+            int clientOneUdpPort = 9001;
            
 
-            using (UdpClient udpServer = new UdpClient(udpPort))
+            using (UdpClient udpServer = new UdpClient(ServerUdpPort))   // server na mrezi porta 9000 server objekat
             {
-                IPEndPoint remoteEP = new IPEndPoint(IPAddress.Any, 0);
-
-                
-
+                IPEndPoint clientOne = new IPEndPoint(IPAddress.Any, clientOneUdpPort);   //bilo koji klijent jer prima od bilo koga
                 string receivedMessage = null;
 
                 while (true)
                 {
                     // Čekaj poruku od klijenta
-                    byte[] receivedData = udpServer.Receive(ref remoteEP);
-                    receivedMessage = Encoding.UTF8.GetString(receivedData);
-
+                    byte[] receivedData = udpServer.Receive(ref clientOne);    // server reciveuje poruku od klijenta
+                    receivedMessage = Encoding.UTF8.GetString(receivedData);  //poruka se iz byte pretvara u string
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"Client says: {receivedMessage}");
                     Console.ResetColor();
@@ -33,9 +30,9 @@ namespace PotapanjePodmornicaServer
                     // Sada je tvoj red za slanje
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.Write("You say: ");
-                    string messageToSend = Console.ReadLine();
-                    byte[] sendData = Encoding.UTF8.GetBytes(messageToSend);
-                    udpServer.Send(sendData, sendData.Length, remoteEP);
+                    string messageToSend = Console.ReadLine();              //poruka
+                    byte[] sendData = Encoding.UTF8.GetBytes(messageToSend);//poruka se encodeuje u byte tip
+                    udpServer.Send(sendData, sendData.Length, clientOne);    //poruka se salje na server (port 9000)
                     Console.ResetColor();
 
                 }

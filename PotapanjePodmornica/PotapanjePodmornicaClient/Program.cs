@@ -9,13 +9,14 @@ namespace PotapanjePodmornicaClient
     {
         static void Main(string[] args)
         {
-            string serverIP = "127.0.0.1";
-            int serverUdpPort = 9000;
+            string serverIP = "127.0.0.1"; //server ip
+            int serverUdpPort = 9000;      //server port
+            int clientUdpPort = 9001;      //klijent 1 port
 
-            
-            using (UdpClient udpClient = new UdpClient())
+
+            using (UdpClient clientOne = new UdpClient(clientUdpPort))   //klijent objekat i stavljamo adresu 9001
             {
-                IPEndPoint serverEP = new IPEndPoint(IPAddress.Parse(serverIP), serverUdpPort);
+                IPEndPoint server = new IPEndPoint(IPAddress.Parse(serverIP), serverUdpPort); //server ovjekat kreira se sa ip i port sa adresom
 
                 while (true)
                 {
@@ -24,12 +25,12 @@ namespace PotapanjePodmornicaClient
                     Console.Write("You say: ");
                     string messageToSend = Console.ReadLine();
                     byte[] dataToSend = Encoding.UTF8.GetBytes(messageToSend);
-                    udpClient.Send(dataToSend, dataToSend.Length, serverEP);
+                    clientOne.Send(dataToSend, dataToSend.Length, server);
                     Console.ResetColor();
 
                     // Čekaj odgovor od servera
                     IPEndPoint fromEP = new IPEndPoint(IPAddress.Any, 0);
-                    byte[] receivedData = udpClient.Receive(ref fromEP);
+                    byte[] receivedData = clientOne.Receive(ref fromEP);
                     string receivedMessage = Encoding.UTF8.GetString(receivedData);
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine($"Server says: {receivedMessage}");
