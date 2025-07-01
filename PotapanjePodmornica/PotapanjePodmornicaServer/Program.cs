@@ -17,6 +17,7 @@ namespace PotapanjePodmornicaServer
             bool c1IsActive = true;
             bool c2IsActive = true;
 
+            //test
 
             using (UdpClient udpServer = new UdpClient(uPortSr))   //server objekat
             {
