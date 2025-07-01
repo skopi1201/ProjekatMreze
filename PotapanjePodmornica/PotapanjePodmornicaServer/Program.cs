@@ -9,34 +9,32 @@ namespace PotapanjePodmornicaServer
     {
         static void Main(string[] args)
         {
-            int ServerUdpPort = 9000;
-            int clientOneUdpPort = 9001;
-           
+            string serverIP = "127.0.0.1";
+            int uPortSr = 9000;
+            int uPortC1 = 9001;
+            int uPortC2 = 9002;
 
-            using (UdpClient udpServer = new UdpClient(ServerUdpPort))   // server na mrezi porta 9000 server objekat
+            bool c1IsActive = true;
+            bool c2IsActive = true;
+
+
+            using (UdpClient udpServer = new UdpClient(uPortSr))   //server objekat
             {
-                IPEndPoint clientOne = new IPEndPoint(IPAddress.Any, clientOneUdpPort);   //bilo koji klijent jer prima od bilo koga
-                string receivedMessage = null;
+                IPEndPoint clientOne = new IPEndPoint(IPAddress.Any, 0);   //client1 objekat
+                string receivedMessage1 = null;
 
-                while (true)
+                while (c1IsActive)
                 {
-                    // Čekaj poruku od klijenta
-                    byte[] receivedData = udpServer.Receive(ref clientOne);    // server reciveuje poruku od klijenta
-                    receivedMessage = Encoding.UTF8.GetString(receivedData);  //poruka se iz byte pretvara u string
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"Client says: {receivedMessage}");
-                    Console.ResetColor();
-
-                    // Sada je tvoj red za slanje
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("You say: ");
-                    string messageToSend = Console.ReadLine();              //poruka
-                    byte[] sendData = Encoding.UTF8.GetBytes(messageToSend);//poruka se encodeuje u byte tip
-                    udpServer.Send(sendData, sendData.Length, clientOne);    //poruka se salje na server (port 9000)
-                    Console.ResetColor();
-
+                    //recieve
+                    byte[] receivedData1 = udpServer.Receive(ref clientOne);
+                    receivedMessage1 = Encoding.UTF8.GetString(receivedData1);
+                    Console.WriteLine($"Client says: {receivedMessage1}");
                 }
+                
             }
+
+          
+
         }
     }
 }

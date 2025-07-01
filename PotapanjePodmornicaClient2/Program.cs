@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
-namespace PotapanjePodmornicaClient
+namespace PotapanjePodmornicaClient2
 {
     internal class Program
     {
@@ -15,7 +15,7 @@ namespace PotapanjePodmornicaClient
             int uPortC2 = 9002;
 
 
-            using (UdpClient clientOne = new UdpClient(uPortC1))   //objekat client1
+            using (UdpClient clientTwo = new UdpClient(uPortC2))   //objekat client1
             {
                 IPEndPoint server = new IPEndPoint(IPAddress.Parse(serverIP), uPortSr); //objekat server
 
@@ -25,9 +25,9 @@ namespace PotapanjePodmornicaClient
                     Console.Write("You say: ");
                     string messageToSend = Console.ReadLine();
                     byte[] dataToSend = Encoding.UTF8.GetBytes(messageToSend);
-                    clientOne.Send(dataToSend, dataToSend.Length, server);
-     
-                    
+                    clientTwo.Send(dataToSend, dataToSend.Length, server);
+
+                   
 
                 }
             }
