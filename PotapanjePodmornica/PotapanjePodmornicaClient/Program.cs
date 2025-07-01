@@ -24,6 +24,7 @@ namespace PotapanjePodmornicaClient
                     //send
                     Console.Write("You say: ");
                     string messageToSend = Console.ReadLine();
+                    messageToSend = "c1 " + messageToSend;
                     byte[] dataToSend = Encoding.UTF8.GetBytes(messageToSend);
                     clientOne.Send(dataToSend, dataToSend.Length, server);
      

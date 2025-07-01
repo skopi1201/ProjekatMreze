@@ -28,13 +28,16 @@ namespace PotapanjePodmornicaServer
                     //recieve
                     byte[] receivedData1 = udpServer.Receive(ref clientOne);
                     receivedMessage1 = Encoding.UTF8.GetString(receivedData1);
-                    Console.WriteLine($"Client says: {receivedMessage1}");
-                }
-                
+
+                    string kojiClient = receivedMessage1.Substring(0,2);
+                    receivedMessage1 = receivedMessage1.Substring(3);
+
+                    if (kojiClient == "c1")
+                        Console.WriteLine($"Client 1 says: {receivedMessage1}");
+                    else if (kojiClient == "c2")
+                        Console.WriteLine($"Client 2 says: {receivedMessage1}");
+                }            
             }
-
-          
-
         }
     }
 }
