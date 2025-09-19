@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Diagnostics;
 
 namespace PotapanjePodmornicaServer
 {
@@ -62,8 +63,8 @@ namespace PotapanjePodmornicaServer
             SHIPS_PER_PLAYER = (size == 3) ? 3 : 5;
             Console.WriteLine($"[SERVER] Mapa: {ROWS}x{COLS}, Brodovi po igracu: {SHIPS_PER_PLAYER}, Limit promasaja: {MISS_LIMIT}");
 
-            Process.Start("PotapanjePodmornicaClient.exe");
-            Process.Start("PotapanjePodmornicaClient.exe");
+            Process.Start(@"..\..\..\PotapanjePodmornicaClient\bin\Debug\PotapanjePodmornicaClient.exe");
+            Process.Start(@"..\..\..\PotapanjePodmornicaClient\bin\Debug\PotapanjePodmornicaClient.exe");
 
 
 
