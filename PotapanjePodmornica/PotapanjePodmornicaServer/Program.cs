@@ -4,22 +4,18 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Diagnostics;
+
 
 namespace PotapanjePodmornicaServer
 {
     internal class Program
     {
-        // ===== Dinamika table i brodova (podešava se na startu) =====
+        // ===== dinamika table i brodova (podesava se na startu) =====
         static int ROWS, COLS, CELLS, SHIPS_PER_PLAYER;
 
-        // ===== Limit promašaja (napadaču se broje promašaji) =====
+        // ===== limit promasaja
         static int MISS_LIMIT;
        
-
-        /// <summary>
-        /// Per-player stanje.
-        /// </summary>
         class Player
         {
             public int Id;              // 1 ili 2
@@ -37,7 +33,7 @@ namespace PotapanjePodmornicaServer
             const int UdpPort = 9000;
             const int TcpPort = 50001;
 
-            // === 0) Izbor dimenzija table ===
+          
             // === 0) Izbor dimenzija table ===
             Console.Write("Unesi velicinu table (3 ili 4): ");
             if (!int.TryParse(Console.ReadLine(), out int size) || (size != 3 && size != 4))
@@ -68,7 +64,7 @@ namespace PotapanjePodmornicaServer
 
 
 
-            // === 1) TCP slušač (pre UDP da izbegnemo "refused") ===
+            // === 1) TCP listener (pre UDP da izbegnemo "refused") ===
             var tcpListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             tcpListener.Bind(new IPEndPoint(IPAddress.Any, TcpPort));
             tcpListener.Listen(2);
@@ -122,7 +118,7 @@ namespace PotapanjePodmornicaServer
             bool continuePlaying = true;
             while (continuePlaying)
             {
-                // === 4) Setup (šaljemo dimenzije i broj brodova, pa tražimo raspored) ===
+                // === 4) Setup s(aljemo dimenzije i broj brodova, pa trzimo raspored) ===
                 SendString(P1.Tcp, $"server: setup {ROWS} {COLS} {SHIPS_PER_PLAYER} {MISS_LIMIT}");
                 SendString(P2.Tcp, $"server: setup {ROWS} {COLS} {SHIPS_PER_PLAYER} {MISS_LIMIT}");
 
@@ -140,7 +136,7 @@ namespace PotapanjePodmornicaServer
                 bool gameOver = false;
                 var recvBuf = new byte[2048];
 
-                // Start: samo napadač dobija tablu
+                // Start: samo napadac dobija tablu
                 SendString(P1.Tcp, "server: match ready; your turn");
                 SendBoardToAttacker(P1.Tcp, P2);
                 SendString(P2.Tcp, "server: match ready; wait");
@@ -155,7 +151,7 @@ namespace PotapanjePodmornicaServer
                         int n = attacker.Tcp.Receive(recvBuf);
                         if (n <= 0) break;
 
-                        // Parsiramo prvi int iz bilo čega što stigne
+                        // parsiramo prvi int iz bilo cega sto stigne
                         string raw = Encoding.UTF8.GetString(recvBuf, 0, n);
                         if (!TryExtractFirstInt(raw, out int cell))
                         {
@@ -170,24 +166,24 @@ namespace PotapanjePodmornicaServer
 
                         CellToRC(cell, COLS, out int r, out int c);
 
-                        // Ako je već gađano
+                        // ako je vec gadjano
                         if (defender.Board[r, c] == 'M' || defender.Board[r, c] == 'H')
                         {
                             SendString(attacker.Tcp, "server: vec gadjano to polje. Izaberi drugo.");
                             continue;
                         }
 
-                        // Primeni pogodak / promašaj
+                        // primeni pogodak / promasaj
                         if (defender.Ships[r, c])
                         {
                             defender.Ships[r, c] = false;
                             defender.Board[r, c] = 'H';
                             defender.RemainingShips--;
 
-                            // Evidencija (log)
+                            // evidencija (log)
                             Console.WriteLine($"[Igrač {attacker.Id}] -> [Igrač {defender.Id}]: polje {cell}, POGODIO");
 
-                            // Obavesti oba
+                            // obavesti oba
                             SendString(P1.Tcp, $"server: P{attacker.Id} gadja {cell} -> POGODIO");
                             SendString(P2.Tcp, $"server: P{attacker.Id} gadja {cell} -> POGODIO");
 
@@ -205,19 +201,19 @@ namespace PotapanjePodmornicaServer
                             defender.Board[r, c] = 'M';
                             attacker.Misses++;
 
-                            // Evidencija (log)
+                            // evidencija (log)
                             Console.WriteLine($"[Igrač {attacker.Id}] -> [Igrač {defender.Id}]: polje {cell}, PROMAŠIO (#{attacker.Misses})");
 
-                            // Obavesti oba
+                            // obavesti oba
                             SendString(P1.Tcp, $"server: P{attacker.Id} gadja {cell} -> PROMASIO");
                             SendString(P2.Tcp, $"server: P{attacker.Id} gadja {cell} -> PROMASIO");
 
-                            // Upozorenje kad ostanu još 2 do limita
+                            // upozorenje kad ostanu jos 2 do limita
                             int remaining = MISS_LIMIT - attacker.Misses;
                             if (remaining == 2)
                                 SendString(attacker.Tcp, $"server: upozorenje: imate jos 2 promasaja pre poraza (limit {MISS_LIMIT}).");
 
-                            // Poraz po limitu promašaja
+                            // poraz po limitu promasaja
                             if (attacker.Misses >= MISS_LIMIT)
                             {
                                 SendString(attacker.Tcp, "server: GAME OVER - IZGUBILI STE (limit promasaja)");
@@ -227,12 +223,12 @@ namespace PotapanjePodmornicaServer
                             }
                         }
 
-                        // Sledeći potez: samo budući napadač dobija tablu
+                        // sledeci potez: samo buduci napadac dobija tablu
                         p1Turn = !p1Turn;
                         if (p1Turn)
                         {
                             SendString(P1.Tcp, "server: your turn");
-                            SendBoardToAttacker(P1.Tcp, P2); // osveži napadaču
+                            SendBoardToAttacker(P1.Tcp, P2); // osvezi napadacu
                             SendString(P2.Tcp, "server: wait");
                         }
                         else
@@ -272,7 +268,7 @@ namespace PotapanjePodmornicaServer
 
         // ========================= Helpers =========================
 
-        /// <summary> Kreira i inicijalizuje igrača (bez resetovanja za novu partiju). </summary>
+        // kreira i inicijalizuje igraca (bez resetovanja za novu partiju)
         static Player NewPlayer(int id, Socket s)
         {
             SendString(s, $"server: connected as player {id}");
@@ -283,7 +279,7 @@ namespace PotapanjePodmornicaServer
             };
         }
 
-        /// <summary> Resetuje stanje igrača za novu partiju (table, brodovi, brojači). </summary>
+        // resetuje stanje igraca za novu partiju (table, brodovi, brojaci)
         static void ResetPlayerForNewMatch(Player p)
         {
             p.Ships = new bool[ROWS, COLS];
@@ -292,7 +288,7 @@ namespace PotapanjePodmornicaServer
             p.Misses = 0;
         }
 
-        /// <summary> Kreira novu ROWS×COLS matricu popunjenu zadatim znakom. </summary>
+        // kreira novu ROWS×COLS matricu popunjenu zadatim znakom
         static char[,] NewCharGrid(char fill)
         {
             var g = new char[ROWS, COLS];
@@ -302,11 +298,9 @@ namespace PotapanjePodmornicaServer
             return g;
         }
 
-        /// <summary>
-        /// Traži od igrača da pošalje koordinate brodova dok ne dobijemo ispravan raspored.
-        /// Format: "ships: a b c ..." (tačno SHIPS_PER_PLAYER različitih brojeva u opsegu 1..CELLS).
-        /// Brodovi su 1x1.
-        /// </summary>
+       
+        // trazi od igraca da posalje koordinate brodova dok ne dobijemo ispravan raspored
+       
         static void RequestShips(Player p)
         {
             while (true)
@@ -358,7 +352,7 @@ namespace PotapanjePodmornicaServer
             }
         }
 
-        /// <summary> Prima jedan TCP paket i vraća ga kao trimovan string. </summary>
+        //prima jedan TCP paket i vraca ga kao trimovan string
         static string ReceiveLine(Socket s)
         {
             var buf = new byte[4096];
@@ -367,14 +361,14 @@ namespace PotapanjePodmornicaServer
             return Encoding.UTF8.GetString(buf, 0, n).Trim();
         }
 
-        /// <summary> Prima "DA" ili "NE" (case-insensitive). Vraća true samo za "DA". </summary>
+        // prima "DA" ili "NE" (case-insensitive) vraca true samo za "DA"
         static bool ReceiveYesNo(Socket s)
         {
             string line = ReceiveLine(s);
             return line.Equals("DA", StringComparison.OrdinalIgnoreCase);
         }
 
-        /// <summary> Šalje protivničku tablu napadaču (simboli _, M, H). </summary>
+        // salje protivnicku tablu napadacu (simboli _, M, H)
         static void SendBoardToAttacker(Socket attackerSock, Player defender)
         {
             var sb = new StringBuilder();
@@ -391,7 +385,7 @@ namespace PotapanjePodmornicaServer
             SendString(attackerSock, sb.ToString());
         }
 
-        /// <summary> Ekstrahuje prvi celobrojni token iz stringa (tolerantno na CR/LF/null/višak teksta). </summary>
+        // Ekstrahuje prvi celobrojni token iz stringa (tolerantno na CR/LF/null/visak teksta)
         static bool TryExtractFirstInt(string s, out int value)
         {
             value = -1;
@@ -402,7 +396,7 @@ namespace PotapanjePodmornicaServer
             return false;
         }
 
-        /// <summary> Prevodi 1..(ROWS*COLS) u par [r,c]. </summary>
+        // Prevodi 1..(ROWS*COLS) u par [r,c]
         static void CellToRC(int cell1Based, int cols, out int r, out int c)
         {
             int idx = cell1Based - 1;
@@ -410,7 +404,7 @@ namespace PotapanjePodmornicaServer
             c = idx % cols;
         }
 
-        /// <summary> Prima "hello N" i vraća N, ili -1 ako je neispravno. </summary>
+        // Prima "hello N" i vraća N, ili -1 ako je neispravno
         static int ReadHelloId(Socket s)
         {
             var buf = new byte[128];
@@ -424,21 +418,21 @@ namespace PotapanjePodmornicaServer
             return -1;
         }
 
-        /// <summary> Šalje UTF-8 paket. </summary>
+        // salje UTF-8 paket 
         static void SendString(Socket s, string text)
         {
             var data = Encoding.UTF8.GetBytes(text);
             s.Send(data);
         }
 
-        /// <summary> Poredi IPEndPoint adrese i portove. </summary>
+        //poredi IPEndPoint adrese i portove. 
         static bool EndPointsEqual(EndPoint a, EndPoint b)
         {
             var ia = (IPEndPoint)a; var ib = (IPEndPoint)b;
             return ia.Address.Equals(ib.Address) && ia.Port == ib.Port;
         }
 
-        /// <summary> Bezbedno gasi soket. </summary>
+        // gasi soket
         static void SafeClose(Socket s)
         {
             try { s?.Shutdown(SocketShutdown.Both); } catch { }

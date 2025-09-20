@@ -9,15 +9,15 @@ namespace PotapanjePodmornicaClient
 {
     internal class Program
     {
-        // Maksimalan broj ćelija (iz setup poruke).
+        // maksimalan broj celija (iz setup poruke).
         static volatile int cellsMax = 9;
 
-        // Tokovi unosa.
+      
         static volatile bool awaitingShips = false;     // unos brodova
         static volatile bool awaitingRestart = false;   // unos "DA/NE" posle game over-a
         static volatile bool promptAfterBoard = false;  // kada dobijemo "your turn", čekamo board pa prompt
 
-        // Id i akcent boja klijenta (1=zeleno, 2=magenta).
+        // Id i akcent boja klijenta (1=zeleno, 2=magenta)
         static volatile int playerId = 0;
         static ConsoleColor Accent => (playerId == 1) ? ConsoleColor.Green : ConsoleColor.Magenta;
 
@@ -60,7 +60,7 @@ namespace PotapanjePodmornicaClient
             var recvThread = new Thread(() => ReceiverLoop(tcp)) { IsBackground = true };
             recvThread.Start();
 
-            // === 4) Sender petlja (korisnički unos) ===
+            // === 4) Sender petlja (korisnicki unos) ===
             while (true)
             {
                 string line = Console.ReadLine();
@@ -69,19 +69,19 @@ namespace PotapanjePodmornicaClient
 
                 if (awaitingRestart)
                 {
-                    // Server očekuje "DA" za restart ili bilo šta drugo za kraj.
+                    // server ocekuje "DA" za restart ili bilo sta drugo za kraj
                     SendString(tcp, line.Trim());
                     continue;
                 }
 
                 if (awaitingShips)
                 {
-                    // Slati tačno onako kako server očekuje.
+                    // Slati tacno onako kako server ocekuje
                     SendString(tcp, "ships: " + line.Trim());
                     continue;
                 }
 
-                // Inače: gađanje – mora ceo broj u opsegu [1..cellsMax]
+                // inace: gadjanje – mora ceo broj u opsegu [1..cellsMax]
                 string trimmed = line.Trim();
                 if (int.TryParse(trimmed, out int cell))
                 {
@@ -105,10 +105,10 @@ namespace PotapanjePodmornicaClient
             SafeClose(tcp);
         }
 
-        /// <summary>
-        /// Prima TCP fragmente, deli ih na pojedinačne "server:" poruke
-        /// i svaku prosleđuje na obradu. Radi i kad više poruka stigne u jednoj porciji.
-        /// </summary>
+        
+        // Prima TCP fragmente, deli ih na pojedinačne "server:" poruke
+        // i svaku prosleđuje na obradu. Radi i kad više poruka stigne u jednoj porciji.
+      
         static void ReceiverLoop(Socket tcp)
         {
             var rbuf = new byte[8192];
@@ -135,9 +135,9 @@ namespace PotapanjePodmornicaClient
             }
         }
 
-        /// <summary>
-        /// Obrada jedne "server:" poruke.
-        /// </summary>
+        
+        // Obrada jedne "server:" poruke
+       
         static void HandleServerMessage(string raw)
         {
             string line = raw.Trim();
@@ -166,7 +166,7 @@ namespace PotapanjePodmornicaClient
                 return;
             }
 
-            // --- Setup: "server: setup R C K MISS_LIMIT" ---
+         
             // --- Setup: "server: setup R C K MISS_LIMIT" ---
             if (line.StartsWith("server: setup", StringComparison.OrdinalIgnoreCase))
             {
@@ -194,7 +194,7 @@ namespace PotapanjePodmornicaClient
             }
 
 
-            // --- Server traži brodove ---
+            // --- Server trazi brodove ---
             if (line.StartsWith("server: send-ships", StringComparison.OrdinalIgnoreCase))
             {
                 awaitingShips = true;
@@ -204,7 +204,7 @@ namespace PotapanjePodmornicaClient
                 return;
             }
 
-            // --- Setup završen ---
+            // --- Setup zavrsen ---
             if (line.StartsWith("server: setup-ok", StringComparison.OrdinalIgnoreCase))
             {
                 awaitingShips = false;
@@ -214,7 +214,7 @@ namespace PotapanjePodmornicaClient
                 return;
             }
 
-            // --- Na potezu / čekanje (crveni tekst, bez pozadine). Prompt ide posle board-a. ---
+            // --- Na potezu / cekanje (crveni tekst, bez pozadine). Prompt ide posle board-a. ---
             if (line.StartsWith("server: your turn", StringComparison.OrdinalIgnoreCase))
             {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -280,10 +280,9 @@ namespace PotapanjePodmornicaClient
             Console.ResetColor();
         }
 
-        /// <summary>
-        /// Deli TCP chunk na pojedinačne "server:" poruke.
-        /// Radi i kada više poruka stigne u istom paketu.
-        /// </summary>
+        // Deli TCP chunk na pojedinacne "server:" poruke
+        // Radi i kada vise poruka stigne u istom paketu
+      
         static IEnumerable<string> SplitServerMessages(string chunk)
         {
             const string tag = "server:";
@@ -316,7 +315,7 @@ namespace PotapanjePodmornicaClient
             }
         }
 
-        /// <summary> Parsira "registered &lt;id&gt;; connect-tcp &lt;port&gt;" iz UDP odgovora. </summary>
+        // Parsira "registered &lt;id&gt;; connect-tcp &lt;port&gt;" iz UDP odgovora.
         static void ParseRegistration(string reg, out int pId, out int tcpPort)
         {
             pId = -1; tcpPort = -1;
@@ -325,14 +324,14 @@ namespace PotapanjePodmornicaClient
             { pId = id; tcpPort = port; }
         }
 
-        /// <summary> Šalje UTF-8 tekst serveru. </summary>
+        // salje UTF-8 tekst serveru
         static void SendString(Socket s, string text)
         {
             var data = Encoding.UTF8.GetBytes(text);
             s.Send(data);
         }
 
-        /// <summary> Bezbedno gašenje soketa. </summary>
+        // Bezbedno gasenje soketa
         static void SafeClose(Socket s)
         {
             try { s?.Shutdown(SocketShutdown.Both); } catch { }
