@@ -263,6 +263,8 @@ namespace PotapanjePodmornicaServer
             } // end while(continuePlaying)
 
             // === kraj ===
+            SafeClose(P1.Tcp);
+            SafeClose(P2.Tcp);
             Console.WriteLine("[SERVER] Shutdown.");
         }
 
@@ -432,6 +434,11 @@ namespace PotapanjePodmornicaServer
             return ia.Address.Equals(ib.Address) && ia.Port == ib.Port;
         }
 
-     
+        // gasi soket
+        static void SafeClose(Socket s)
+        {
+            try { s?.Shutdown(SocketShutdown.Both); } catch { }
+            try { s?.Close(); } catch { }
+        }
     }
 }
