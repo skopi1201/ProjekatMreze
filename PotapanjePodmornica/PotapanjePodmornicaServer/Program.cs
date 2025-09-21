@@ -59,6 +59,8 @@ namespace PotapanjePodmornicaServer
             SHIPS_PER_PLAYER = (size == 3) ? 3 : 5;
             Console.WriteLine($"[SERVER] Mapa: {ROWS}x{COLS}, Brodovi po igracu: {SHIPS_PER_PLAYER}, Limit promasaja: {MISS_LIMIT}");
 
+
+            // === Pokretanje 2 klijenta (iz projekta u sibling folderu) ===
             Process.Start(@"..\..\..\PotapanjePodmornicaClient\bin\Debug\PotapanjePodmornicaClient.exe");
             Process.Start(@"..\..\..\PotapanjePodmornicaClient\bin\Debug\PotapanjePodmornicaClient.exe");
 
