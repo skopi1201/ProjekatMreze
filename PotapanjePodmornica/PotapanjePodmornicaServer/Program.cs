@@ -432,11 +432,6 @@ namespace PotapanjePodmornicaServer
             return ia.Address.Equals(ib.Address) && ia.Port == ib.Port;
         }
 
-        // gasi soket
-        static void SafeClose(Socket s)
-        {
-            try { s?.Shutdown(SocketShutdown.Both); } catch { }
-            try { s?.Close(); } catch { }
-        }
+     
     }
 }
